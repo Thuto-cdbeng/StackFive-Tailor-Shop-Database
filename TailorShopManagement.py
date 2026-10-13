@@ -123,15 +123,12 @@ def op_7_service_match_matrix(conn):
 def op_8_tailor_workload_hours(conn):
     print("\n--- [8.0] Staff Manager: Tailor Workload & Projected Hours ---")
     query = """
-    SELECT t.first_name, t.last_name, 
-           GROUP_CONCAT(s.service_name SEPARATOR ', ') AS services,
-           SUM(s.est_hours) AS total_projected_hours
-    FROM Tailors t
-    JOIN GarmentServices s ON t.tailor_id = s.tailor_id
-    JOIN Orders o ON s.service_id = o.service_id
-    WHERE o.status = 'In Progress'
-    GROUP BY t.tailor_id, t.first_name, t.last_name
-    HAVING SUM(s.est_hours) > 0;
+   SELECT t.first_name, t.last_name, 
+       GROUP_CONCAT(s.service_name SEPARATOR ', ') AS services,
+       SUM(s.est_hours) AS total_projected_hours
+FROM Tailors t
+JOIN GarmentServices s ON t.tailor_id = s.tailor_id
+GROUP BY t.tailor_id, t.first_name, t.last_name;
     """
     execute_query(conn, query)
 
