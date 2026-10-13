@@ -48,12 +48,12 @@ def execute_query(connection, query, params=None):
 # =====================================================================
 
 def op_1_list_customers(conn):
-    print("\n--- [1.0] Staff Portal: Customer Directory ---")
+    print("\n--- [1.0] Customer Directory ---")
     query = "SELECT * FROM Customers;"
     execute_query(conn, query)
 
 def op_2_services_by_category(conn):
-    print("\n--- [2.0] Operations: Garment Services Volume Breakdown ---")
+    print("\n--- [2.0] Garment Services Volume Breakdown ---")
     query = """
     SELECT category, COUNT(service_id) AS total_services
     FROM GarmentServices
@@ -62,7 +62,7 @@ def op_2_services_by_category(conn):
     execute_query(conn, query)
 
 def op_3_urgent_orders(conn):
-    print("\n--- [3.0] Workshop Queue: Urgently Due Orders (<= 7 Days) ---")
+    print("\n--- [3.0] Urgently Due Orders (<= 7 Days) ---")
     query = """
     SELECT o.order_id, c.first_name, c.last_name, DATEDIFF(o.due_date, CURDATE()) AS days_remaining
     FROM Orders o
@@ -72,7 +72,7 @@ def op_3_urgent_orders(conn):
     execute_query(conn, query)
 
 def op_4_tailor_capacity(conn):
-    print("\n--- [4.0] Staff Manager: Active Tailor Capacity Allocation ---")
+    print("\n--- [4.0] Active Tailor Capacity Allocation ---")
     query = """
     SELECT t.first_name, t.last_name, COUNT(s.service_id) AS assigned_services
     FROM Tailors t
@@ -82,7 +82,7 @@ def op_4_tailor_capacity(conn):
     execute_query(conn, query)
 
 def op_5_fitting_completion_rate(conn):
-    print("\n--- [5.0] Fitting Specialist: Customer Fitting Completion Rate ---")
+    print("\n--- [5.0] Customer Fitting Completion Rate ---")
     query = """
     SELECT c.first_name, c.last_name,
            COUNT(f.fitting_id) AS total_fittings,
@@ -95,7 +95,7 @@ def op_5_fitting_completion_rate(conn):
     execute_query(conn, query)
 
 def op_6_comprehensive_order_breakdown(conn):
-    print("\n--- [6.0] Workshop: Master Operational Delivery Schedule ---")
+    print("\n--- [6.0] Master Operational Delivery Schedule ---")
     query = """
     SELECT o.order_id, CONCAT(c.first_name, ' ', c.last_name) AS customer_name,
            s.service_name, CONCAT(t.first_name, ' ', t.last_name) AS lead_tailor, o.due_date
@@ -106,22 +106,19 @@ def op_6_comprehensive_order_breakdown(conn):
     """
     execute_query(conn, query)
 
-def op_7_service_match_matrix(conn):
-    print("\n--- [7.0] Front Desk: Automated Service Action Guidelines ---")
+def op_7_customer_fitting_service_tracking(conn):
+    print("\n--- [7.0] Customer Fitting Service Tracker ---")
     query = """
-    SELECT c.first_name, c.last_name, s.service_name,
-           CASE 
-               WHEN s.category = 'Bespoke' THEN 'Full Fitting Required'
-               WHEN s.category = 'Alteration' THEN 'Standard Adjustment'
-               ELSE 'Quick Repair'
-           END AS service_action
+    SELECT c.first_name, c.last_name, o.order_id, f.fitting_date, f.status
     FROM Customers c
-    CROSS JOIN GarmentServices s;
+    JOIN Orders o ON c.customer_id = o.customer_id
+    JOIN Fittings f ON o.order_id = f.order_id
+    ORDER BY f.fitting_date ASC;
     """
     execute_query(conn, query)
 
 def op_8_tailor_workload_hours(conn):
-    print("\n--- [8.0] Staff Manager: Tailor Workload & Projected Hours ---")
+    print("\n--- [8.0] Tailor Workload & Projected Hours ---")
     query = """
    SELECT t.first_name, t.last_name, 
        GROUP_CONCAT(s.service_name SEPARATOR ', ') AS services,
@@ -133,7 +130,7 @@ GROUP BY t.tailor_id, t.first_name, t.last_name;
     execute_query(conn, query)
 
 def op_9_revenue_projection(conn):
-    print("\n--- [9.0] Management: Revenue Projections by Service Category ---")
+    print("\n--- [9.0] Revenue Projections by Service Category ---")
     query = """
     SELECT s.category, COUNT(o.order_id) AS orders_placed,
            SUM(s.base_price) AS gross_revenue_projection,
@@ -145,7 +142,7 @@ def op_9_revenue_projection(conn):
     execute_query(conn, query)
 
 def op_10_inactive_customers(conn):
-    print("\n--- [10.0] Marketing: Re-engagement List (Inactive Clients) ---")
+    print("\n--- [10.0] Re-engagement List (Inactive Clients) ---")
     query = """
     SELECT c.customer_id, c.first_name, c.last_name, c.email
     FROM Customers c
@@ -209,7 +206,7 @@ def main():
         elif choice == '6':
             op_6_comprehensive_order_breakdown(conn)
         elif choice == '7':
-            op_7_service_match_matrix(conn)
+            op_7_customer_fitting_service_tracking(conn)
         elif choice == '8':
             op_8_tailor_workload_hours(conn)
         elif choice == '9':
